@@ -77,12 +77,12 @@ ALT_CPPFLAGS += -pipe
 
 # This following VERSION comment indicates the version of the tool used to 
 # generate this makefile. A makefile variable is provided for VERSION as well. 
-# ACDS_VERSION: 20.1
-ACDS_VERSION := 20.1
+# ACDS_VERSION: 22.1
+ACDS_VERSION := 22.1
 
 # This following BUILD_NUMBER comment indicates the build number of the tool 
 # used to generate this makefile. 
-# BUILD_NUMBER: 720
+# BUILD_NUMBER: 917
 
 # Qsys--generated SOPCINFO file. Required for resolving node instance ID's with 
 # design component names. 
@@ -123,6 +123,7 @@ ELF_PATCH_FLAG  += --cpu_name $(CPU_NAME)
 
 # Hardware Divider present. 
 # setting HARDWARE_DIVIDE is true
+ALT_CFLAGS += -mhw-div
 ALT_CFLAGS += -mhw-div
 
 # Hardware Multiplier present. 
@@ -170,7 +171,7 @@ ELF_PATCH_FLAG  += --timestamp 1633705653
 # setting altera_avalon_jtag_uart_driver.enable_jtag_uart_ignore_fifo_full_error is false
 
 # Small-footprint (polled mode) driver none 
-# setting altera_avalon_jtag_uart_driver.enable_small_driver is false
+# setting altera_avalon_jtag_uart_driver.enable_small_driver is true
 
 # Build a custom version of newlib with the specified space-separated compiler 
 # flags. The custom newlib build will be placed in the <bsp root>/newlib 
@@ -405,6 +406,12 @@ ALT_CFLAGS += -mcustom-floatis=250
 ALT_CFLAGS += -mcustom-fmuls=252
 ALT_CFLAGS += -mcustom-fnegs=225
 ALT_CFLAGS += -mcustom-fsubs=254
+
+#------------------------------------------------------------------------------
+#        SOFTWARE COMPONENT & DRIVER SETTING-PRODUCED DEFINITIONS
+#------------------------------------------------------------------------------
+
+ALT_CPPFLAGS += -DALTERA_AVALON_JTAG_UART_SMALL
 
 #END MANAGED
 

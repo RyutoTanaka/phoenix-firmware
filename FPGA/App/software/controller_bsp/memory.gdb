@@ -3,7 +3,7 @@
 # Machine generated for CPU 'nios_0' in SOPC Builder design 'controller'
 # SOPC Builder design path: ../../controller.sopcinfo
 #
-# Generated: Sat Oct 02 23:49:45 JST 2021
+# Generated: Fri Jul 14 17:51:02 JST 2023
 
 # DO NOT MODIFY THIS FILE
 #
