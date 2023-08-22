@@ -256,7 +256,7 @@ void CentralizedMonitor::doPeriodicCommonWork(void) {
             Led::setAllOff();
         }
         else if (!VectorController::isFault() && !MotorController::isFault()) {
-            Led::setAllOn();
+            Led::setAllOff();
         }
         else {
             Led::setAllOff();
