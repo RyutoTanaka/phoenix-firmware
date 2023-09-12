@@ -30,7 +30,7 @@ public:
      * @param wheel_velocity 車輪速度
      * @param wheel_current モーター電流
      */
-    void update(const Eigen::Vector3f& accel, const Eigen::Vector3f& gyro, const Eigen::Vector4f& wheel_velocity, const Eigen::Vector4f& wheel_current);
+    void update(const Eigen::Vector3f& accel, const Eigen::Vector3f& gyro, const Eigen::Vector4f& wheel_velocity, const Eigen::Vector4f& wheel_current, const Eigen::Vector4f& ref_wheel_current);
 
     /**
      * @brief 車体速度の推定値を取得する

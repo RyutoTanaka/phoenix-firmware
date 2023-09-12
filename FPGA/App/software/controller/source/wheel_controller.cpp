@@ -160,9 +160,11 @@ void WheelController::update(bool new_parameters, bool sensor_only) {
     speed_ok &= fabsf(parameters.speed_y) <= MAX_TRANSLATION_REFERENCE;
     speed_ok &= fabsf(parameters.speed_omega) <= MAX_OMEGA_REFERENCE;
 
+    Vector4f ref_body_velocity = {parameters.speed_x, parameters.speed_y, parameters.speed_omega, 0.0f};
+
     // 車体速度を推定する
     _gravity_filter.update(motion.accelerometer, motion.gyroscope);
-    _velocity_filter.update(bodyAcceleration(), motion.gyroscope, wheel_velocity, motion.wheel_current_q);
+    _velocity_filter.update(bodyAcceleration(), motion.gyroscope, wheel_velocity, motion.wheel_current_q, ref_body_velocity);
     if (!isfinite(bodyVelocity()[0]) || !isfinite(bodyVelocity()[1]) || !isfinite(bodyVelocity()[2])) {
         CentralizedMonitor::setErrorFlags(ErrorCauseArithmetic);
         return;
@@ -199,7 +201,7 @@ void WheelController::update(bool new_parameters, bool sensor_only) {
         }
 
         // 車体速度制御を行う
-        Vector4f ref_body_velocity = {parameters.speed_x, parameters.speed_y, parameters.speed_omega, 0.0f};
+
 #if USE_SIMPLE_CONTROL
         Vector4f ref_wheel_velocity = velocityVectorDecomposition(ref_body_velocity);
         for (int index = 0; index < 4; index++) {

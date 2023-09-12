@@ -40,7 +40,7 @@ static constexpr float SIGMA_GYROSCOPE = 0.01f;
 static constexpr float SIGMA_KF = 100.0f;
 
 /// 摩擦係数の最小値
-static constexpr float MIN_KF = 20.0f;
+static constexpr float MIN_KF = 5.0f;
 
 /// 摩擦係数の最大値
 static constexpr float MAX_KF = 1000.0f;
@@ -48,15 +48,21 @@ static constexpr float MAX_KF = 1000.0f;
 /**
  * @brief wheel_velocity - velocity を計算する
  */
-static inline Vector4f wheelVelocityError(const Vector4f& wheel_velocity, float vx, float vy, float omega) {
-    Vector4f error;
+static inline Vector4f wheelVelocityError(const Vector4f& wheel_velocity, const Vector4f& ref_wheel_current, float vx, float vy, float omega) {
+    Vector4f error, slip_offset;
     vx *= (WHEEL_POS_Y / sqrt(WHEEL_POS_R_2));
     vy *= (WHEEL_POS_X / sqrt(WHEEL_POS_R_2));
     omega *= sqrt(WHEEL_POS_R_2);
-    error(0) = wheel_velocity(0) - (omega - vx + vy);
-    error(1) = wheel_velocity(1) - (omega + vx + vy);
-    error(2) = wheel_velocity(2) - (omega + vx - vy);
-    error(3) = wheel_velocity(3) - (omega - vx - vy);
+    // スリップがモーターのトルクに比例して起こると仮定する。
+    // 少ないデータからスリップゲイン[(m/s)/Nm]を計算したところ大体7.63fになった。(この値はフィールドごと、タイヤごとに変わる可能性が高い)
+    slip_offset(0) = fpu::clamp(7.63f * MOTOR_TORQUE_CONSTANT * fabsf(ref_wheel_current(0)) + 0.915f, 0.0f, 100.0f);
+    slip_offset(1) = fpu::clamp(7.63f * MOTOR_TORQUE_CONSTANT * fabsf(ref_wheel_current(1)) + 0.915f, 0.0f, 100.0f);
+    slip_offset(2) = fpu::clamp(7.63f * MOTOR_TORQUE_CONSTANT * fabsf(ref_wheel_current(2)) + 0.915f, 0.0f, 100.0f);
+    slip_offset(3) = fpu::clamp(7.63f * MOTOR_TORQUE_CONSTANT * fabsf(ref_wheel_current(3)) + 0.915f, 0.0f, 100.0f);
+    error(0) = wheel_velocity(0) - (slip_offset(0) + (omega - vx + vy));
+    error(1) = wheel_velocity(1) - (slip_offset(1) + (omega + vx + vy));
+    error(2) = wheel_velocity(2) - (slip_offset(2) + (omega + vx - vy));
+    error(3) = wheel_velocity(3) - (slip_offset(3) + (omega - vx - vy));
     return error;
 }
 
@@ -325,7 +331,7 @@ void VelocityFilter::reset(void) {
     H(6, 2) = 1.0f;
 }
 
-void VelocityFilter::update(const Vector3f& accel, const Vector3f& gyro, const Vector4f& wheel_velocity, const Vector4f& wheel_current) {
+void VelocityFilter::update(const Vector3f& accel, const Vector3f& gyro, const Vector4f& wheel_velocity, const Vector4f& wheel_current, const Vector4f& ref_wheel_current) {
     // 定数の定義
     constexpr float DELTA_TIME = 1.0f / IMU_OUTPUT_RATE;
     const float WHEEL_POS_R = sqrt(WHEEL_POS_R_2);
@@ -352,7 +358,7 @@ void VelocityFilter::update(const Vector3f& accel, const Vector3f& gyro, const V
     kf(1) = _mu(4);
     kf(2) = _mu(5);
     kf(3) = _mu(6);
-    Vector4f romega_minus_v = wheelVelocityError(wheel_velocity, vx, vy, Omega);
+    Vector4f romega_minus_v = wheelVelocityError(wheel_velocity, ref_wheel_current, vx, vy, Omega);
     force(0) = kf(0) * romega_minus_v(0);
     force(1) = kf(1) * romega_minus_v(1);
     force(2) = kf(2) * romega_minus_v(2);
@@ -411,7 +417,7 @@ void VelocityFilter::update(const Vector3f& accel, const Vector3f& gyro, const V
     kf_hat(1) = mu_hat(4);
     kf_hat(2) = mu_hat(5);
     kf_hat(3) = mu_hat(6);
-    Vector4f romega_minus_v_hat = wheelVelocityError(wheel_velocity, vx_hat, vy_hat, Omega_hat);
+    Vector4f romega_minus_v_hat = wheelVelocityError(wheel_velocity, ref_wheel_current, vx_hat, vy_hat, Omega_hat);
     force_hat(0) = kf_hat(0) * romega_minus_v_hat(0);
     force_hat(1) = kf_hat(1) * romega_minus_v_hat(1);
     force_hat(2) = kf_hat(2) * romega_minus_v_hat(2);
