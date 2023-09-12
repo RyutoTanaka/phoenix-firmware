@@ -55,10 +55,10 @@ static inline Vector4f wheelVelocityError(const Vector4f& wheel_velocity, const 
     omega *= sqrt(WHEEL_POS_R_2);
     // スリップがモーターのトルクに比例して起こると仮定する。
     // 少ないデータからスリップゲイン[(m/s)/Nm]を計算したところ大体7.63fになった。(この値はフィールドごと、タイヤごとに変わる可能性が高い)
-    slip_offset(0) = fpu::clamp(7.63f * MOTOR_TORQUE_CONSTANT * fabsf(ref_wheel_current(0)) + 0.915f, 0.0f, 100.0f);
-    slip_offset(1) = fpu::clamp(7.63f * MOTOR_TORQUE_CONSTANT * fabsf(ref_wheel_current(1)) + 0.915f, 0.0f, 100.0f);
-    slip_offset(2) = fpu::clamp(7.63f * MOTOR_TORQUE_CONSTANT * fabsf(ref_wheel_current(2)) + 0.915f, 0.0f, 100.0f);
-    slip_offset(3) = fpu::clamp(7.63f * MOTOR_TORQUE_CONSTANT * fabsf(ref_wheel_current(3)) + 0.915f, 0.0f, 100.0f);
+    slip_offset(0) = fpu::clamp(7.63f * MOTOR_TORQUE_CONSTANT * fabsf(ref_wheel_current(0)), 0.0f, 100.0f);
+    slip_offset(1) = fpu::clamp(7.63f * MOTOR_TORQUE_CONSTANT * fabsf(ref_wheel_current(1)), 0.0f, 100.0f);
+    slip_offset(2) = fpu::clamp(7.63f * MOTOR_TORQUE_CONSTANT * fabsf(ref_wheel_current(2)), 0.0f, 100.0f);
+    slip_offset(3) = fpu::clamp(7.63f * MOTOR_TORQUE_CONSTANT * fabsf(ref_wheel_current(3)), 0.0f, 100.0f);
     error(0) = wheel_velocity(0) - (slip_offset(0) + (omega - vx + vy));
     error(1) = wheel_velocity(1) - (slip_offset(1) + (omega + vx + vy));
     error(2) = wheel_velocity(2) - (slip_offset(2) + (omega + vx - vy));
